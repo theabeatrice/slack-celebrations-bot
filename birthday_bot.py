@@ -32,7 +32,8 @@ BIRTHDAY_MESSAGES = [
     "🌟 Sending birthday wishes to the wonderful {name}! Have an incredible day! 🎈",
     "🎊 {name} is leveling up today! Happy Birthday! 🎮",
     "🎵 Happy Birthday to you, happy birthday to you, happy birthday dear {name}! 🎵",
-    "🍰 Time to celebrate {name}! May your birthday be filled with joy and cake! 🎂"
+    "🍰 Time to celebrate {name}! May your birthday be filled with joy and cake! 🎂",
+    "🎊 {name} is the birthday star today! ⭐"
 ]
 
 # Giphy birthday GIF search terms (family-friendly)
