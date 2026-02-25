@@ -10,6 +10,7 @@ v1
 - 🎉 **Check today's birthdays** - Find out who's celebrating today
 - 🗑️ **Remove birthdays** - Delete birthday entries
 - 💬 **Interactive responses** - Bot responds to mentions and birthday keywords
+
 v2
 - ⛰️ **Mountain Time with Auto Daylight Savings** - Bot shows current Mountain TIme when you configure it
 - 🍰 **Birthday Wish Collection System** - Reminds the team 3 days before each birthday to add a wish
