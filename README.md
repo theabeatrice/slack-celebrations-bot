@@ -16,6 +16,9 @@ v2
 - 🍰 **Birthday Wish Collection System** - Reminds the team 3 days before each birthday to add a wish
 - ♊ **Zodiac Signs** - Shows with every birthday and is automatically calculated from birth date
 
+v3
+- ⛰️ **CSV Birthday Import** - Import 10, 20, 50+ birthdays at once! No more adding one by one + just upload a CSV file
+
 ## prerequisites 🍰*ੈ✩‧₊˚
 
 - Python 3.7 or higher
