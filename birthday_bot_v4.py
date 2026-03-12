@@ -651,14 +651,28 @@ def handle_list_anniversaries(ack, say):
         say("No anniversaries saved yet! Use `/importcelebrations` to add some.")
         return
     
-    sorted_anniversaries = sorted(
-        anniversaries.items(),
-        key=lambda x: datetime.strptime(f"2024-{x[1]['date']}", "%Y-%m-%d")
-    )
+    # Sort by MM-DD (ignore year for sorting)
+    def get_sort_key(item):
+        date_str = item[1]['date']
+        # Extract MM-DD from either MM-DD or MM-DD-YYYY
+        parts = date_str.split('-')
+        if len(parts) >= 2:
+            return datetime.strptime(f"2024-{parts[0]}-{parts[1]}", "%Y-%m-%d")
+        return datetime.strptime(f"2024-{date_str}", "%Y-%m-%d")
+    
+    sorted_anniversaries = sorted(anniversaries.items(), key=get_sort_key)
     
     message = "🎊 *Work Anniversaries* 🎊\n\n"
     for user_id, data in sorted_anniversaries:
-        date_obj = datetime.strptime(f"2024-{data['date']}", "%Y-%m-%d")
+        date_str = data['date']
+        # Extract MM-DD for display
+        parts = date_str.split('-')
+        if len(parts) >= 2:
+            display_date = f"{parts[0]}-{parts[1]}"
+        else:
+            display_date = date_str
+            
+        date_obj = datetime.strptime(f"2024-{display_date}", "%Y-%m-%d")
         formatted_date = date_obj.strftime("%B %d")
         message += f"• <@{user_id}>: {formatted_date}\n"
     
@@ -717,16 +731,31 @@ def handle_add_wish(ack, command, say):
     
     text = command['text'].strip()
     
-    if not text or not text.startswith('<@'):
+    if not text:
         say("Please mention a user and include a message! Format: `/addwish @user Your message here`")
         return
     
+    # Split and check format
     parts = text.split(None, 1)
+    
+    # Check if first part looks like a user mention
     if len(parts) < 2:
         say("Please include a message! Format: `/addwish @user Your message here`")
         return
     
-    user_id = parts[0].strip('<@>|')
+    # Extract user ID from mention (handles <@U123|name> or <@U123> format)
+    first_part = parts[0]
+    if first_part.startswith('<@') and '>' in first_part:
+        # Extract user ID from <@U123|name> or <@U123>
+        user_id = first_part.strip('<@>').split('|')[0]
+    elif first_part.startswith('@'):
+        # Handle @username format (less reliable, but try)
+        say("Please use @mention to select the person from the dropdown, not just type their name!")
+        return
+    else:
+        say("Please mention a user! Format: `/addwish @user Your message here`")
+        return
+    
     message = parts[1]
     
     birthdays = load_birthdays()
@@ -741,7 +770,7 @@ def handle_add_wish(ack, command, say):
         say(f"<@{user_id}> doesn't have a birthday or anniversary saved yet!")
         return
     
-    # Store wish (we'll determine type when posting)
+    # Store wish
     wish_entry = {
         "from_user": command['user_id'],
         "message": message,
