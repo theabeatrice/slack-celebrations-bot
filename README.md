@@ -22,8 +22,29 @@ v3
 v4
 - 🎊 **Work Anniversary Tracking** - Track employee work anniversaries with automatic year calculation
 - 📁 **Combined Import** - Import birthdays AND anniversaries in one CSV
-- 🫧 **Anniversary Commands** - /todayscelebrations, /addwish, etc.
+- 🥪 **Anniversary Commands** - /todayscelebrations, /addwish, etc.
 - 💌 **Smart Wish System** - Wishes automatically apply to the right celebration type
+
+v5
+- 🔖 **Removed /addwish command** - Simplified the bot so less complexity for users
+- 🌸 **Upcoming Birthdays** - See all birthdays coming up in the next 2 months
+- 🫧 **Upcoming Anniversaries** - See all work anniversaries coming up in the next 2 months
+
+## core commands 🍰*ੈ✩‧₊˚ (8 total):
+
+DAILY USE:
+- /todayscelebrations - Check today's birthdays & anniversaries
+- /setbirthdaychannel - Set where daily posts go
+
+VIEW DATA:
+- /listbirthdays - All birthdays sorted by date
+- /listanniversaries - All anniversaries sorted by date
+- /upcomingbirthdays - Next 2 months 🆕
+- /upcominganniversaries - Next 2 months 🆕
+
+MANAGE DATA:
+- /importcelebrations - Import from CSV
+- /addbirthday - Add a single birthday manually
 
 ## prerequisites 🍰*ੈ✩‧₊˚
 
@@ -33,7 +54,7 @@ v4
 
 ## next steps + improvements 🍰*ੈ✩‧₊˚
 
-ideas to enhance the bot (v5):
+ideas to enhance the bot (v6):
 
 - 🔔 **Milestone anniversaries (5, 10, 15 year special treatment)**
 - 🎁 **Anniversary statistics (average tenure, longest-serving, etc.)**
