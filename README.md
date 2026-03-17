@@ -30,6 +30,22 @@ v5
 - 🌸 **Upcoming Birthdays** - See all birthdays coming up in the next 2 months
 - 🫧 **Upcoming Anniversaries** - See all work anniversaries coming up in the next 2 months
 
+## core commands 🍰*ੈ✩‧₊˚ (8 total):
+
+DAILY USE:
+- /todayscelebrations - Check today's birthdays & anniversaries
+- /setbirthdaychannel - Set where daily posts go
+
+VIEW DATA:
+- /listbirthdays - All birthdays sorted by date
+- /listanniversaries - All anniversaries sorted by date
+- /upcomingbirthdays - Next 2 months 🆕
+- /upcominganniversaries - Next 2 months 🆕
+
+MANAGE DATA:
+- /importcelebrations - Import from CSV
+- /addbirthday - Add a single birthday manually
+
 ## prerequisites 🍰*ੈ✩‧₊˚
 
 - Python 3.7 or higher
@@ -38,7 +54,7 @@ v5
 
 ## next steps + improvements 🍰*ੈ✩‧₊˚
 
-ideas to enhance the bot (v5):
+ideas to enhance the bot (v6):
 
 - 🔔 **Milestone anniversaries (5, 10, 15 year special treatment)**
 - 🎁 **Anniversary statistics (average tenure, longest-serving, etc.)**
