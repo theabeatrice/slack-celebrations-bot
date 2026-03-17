@@ -341,7 +341,10 @@ def post_reminders():
         day_name = person['date'].strftime("%A, %B %d")
         message = (
             f"📢 *Upcoming Birthday Alert!* 📢\n\n"
-            f"<@{person['user_id']}>'s birthday is coming up on {day_name}! {person['zodiac_emoji']} *{person['zodiac_name']}*"
+            f"<@{person['user_id']}>'s birthday is coming up on {day_name}! {person['zodiac_emoji']} *{person['zodiac_name']}*\n\n"
+            f"💌 Want to wish them a happy birthday? Use:\n"
+            f"`/addwish <@{person['user_id']}> Your personal message here`\n\n"
+            f"All wishes will be shared on their special day! 🎂"
         )
         
         try:
@@ -357,7 +360,10 @@ def post_reminders():
         years_text = format_years(person['years'])
         message = (
             f"📢 *Upcoming Anniversary Alert!* 📢\n\n"
-            f"<@{person['user_id']}>'s {years_text} work anniversary is coming up on {day_name}! 🎊"
+            f"<@{person['user_id']}>'s {years_text} work anniversary is coming up on {day_name}! 🎊\n\n"
+            f"💌 Want to congratulate them? Use:\n"
+            f"`/addwish <@{person['user_id']}> Your congratulations message here`\n\n"
+            f"All messages will be shared on their special day! 🌟"
         )
         
         try:
@@ -375,6 +381,8 @@ def post_celebrations():
         print("No announcement channel set.")
         return
     
+    wishes = load_wishes()
+    
     # Post birthdays
     birthday_people = check_birthdays_today()
     for person in birthday_people:
@@ -383,6 +391,8 @@ def post_celebrations():
             name=f"<@{person['user_id']}>",
             zodiac=zodiac_text
         )
+        
+        user_wishes = wishes.get(f"{person['user_id']}_birthday", [])
         
         blocks = [
             {
@@ -393,6 +403,19 @@ def post_celebrations():
                 }
             }
         ]
+        
+        if user_wishes:
+            wishes_text = "\n\n💌 *Birthday Wishes from the Team:*\n\n"
+            for wish in user_wishes:
+                wishes_text += f"• <@{wish['from_user']}>: _{wish['message']}_\n"
+            
+            blocks.append({
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": wishes_text
+                }
+            })
         
         if config.get("giphy_enabled", True):
             gif_url = get_random_gif(is_anniversary=False)
@@ -410,6 +433,10 @@ def post_celebrations():
                 blocks=blocks
             )
             print(f"Posted birthday celebration for {person['name']}")
+            
+            if f"{person['user_id']}_birthday" in wishes:
+                del wishes[f"{person['user_id']}_birthday"]
+                save_wishes(wishes)
                 
         except Exception as e:
             print(f"Error posting birthday: {e}")
@@ -423,6 +450,8 @@ def post_celebrations():
             years=years_text
         )
         
+        user_wishes = wishes.get(f"{person['user_id']}_anniversary", [])
+        
         blocks = [
             {
                 "type": "section",
@@ -432,6 +461,19 @@ def post_celebrations():
                 }
             }
         ]
+        
+        if user_wishes:
+            wishes_text = "\n\n💌 *Congratulations from the Team:*\n\n"
+            for wish in user_wishes:
+                wishes_text += f"• <@{wish['from_user']}>: _{wish['message']}_\n"
+            
+            blocks.append({
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": wishes_text
+                }
+            })
         
         if config.get("giphy_enabled", True):
             gif_url = get_random_gif(is_anniversary=True)
@@ -449,6 +491,10 @@ def post_celebrations():
                 blocks=blocks
             )
             print(f"Posted anniversary celebration for {person['name']}")
+            
+            if f"{person['user_id']}_anniversary" in wishes:
+                del wishes[f"{person['user_id']}_anniversary"]
+                save_wishes(wishes)
                 
         except Exception as e:
             print(f"Error posting anniversary: {e}")
@@ -678,156 +724,81 @@ def handle_set_channel(ack, command, say):
         f"🕐 Daily checks at 9:00 AM Mountain Time\n"
         f"⏰ Current time: {current_time}")
 
-@app.command("/upcomingbirthdays")
-def handle_upcoming_birthdays(ack, say):
-    """Show upcoming birthdays for the next 2 months"""
+@app.command("/addwish")
+def handle_add_wish(ack, command, say):
+    """Add a wish for birthday or anniversary"""
     ack()
+    
+    text = command['text'].strip()
+    
+    # DEBUG: Log what we received
+    print(f"DEBUG /addwish - Received text: '{text}'")
+    print(f"DEBUG /addwish - Command data: {command}")
+    
+    if not text:
+        say("Please mention a user and include a message! Format: `/addwish @user Your message here`")
+        return
+    
+    # Split and check format
+    parts = text.split(None, 1)
+    
+    # Check if first part looks like a user mention
+    if len(parts) < 2:
+        say("Please include a message! Format: `/addwish @user Your message here`")
+        return
+    
+    # Extract user ID from mention (handles <@U123|name> or <@U123> format)
+    first_part = parts[0]
+    print(f"DEBUG /addwish - First part: '{first_part}'")
+    
+    if first_part.startswith('<@') and '>' in first_part:
+        # Extract user ID from <@U123|name> or <@U123>
+        user_id = first_part.strip('<@>').split('|')[0]
+        print(f"DEBUG /addwish - Extracted user_id: '{user_id}'")
+    elif first_part.startswith('@'):
+        # Handle @username format (less reliable, but try)
+        say(f"⚠️ DEBUG: Received '@username' format instead of mention.\n\nReceived: `{first_part}`\n\nPlease use @mention to select the person from the dropdown, not just type their name!")
+        return
+    else:
+        say(f"⚠️ DEBUG: First part doesn't look like a mention.\n\nReceived: `{first_part}`\n\nPlease mention a user! Format: `/addwish @user Your message here`")
+        return
+    
+    message = parts[1]
     
     birthdays = load_birthdays()
-    
-    if not birthdays:
-        say("No birthdays saved yet!")
-        return
-    
-    mountain_now = get_mountain_time()
-    today = mountain_now.date()
-    
-    # Get birthdays for next 60 days
-    upcoming = []
-    for user_id, data in birthdays.items():
-        birthday_str = data.get('date', '')
-        if not birthday_str:
-            continue
-            
-        try:
-            month, day = map(int, birthday_str.split('-'))
-            
-            # Calculate next occurrence of this birthday
-            current_year = today.year
-            birthday_this_year = date(current_year, month, day)
-            
-            if birthday_this_year < today:
-                # Birthday already passed this year, use next year
-                birthday_next = date(current_year + 1, month, day)
-            else:
-                birthday_next = birthday_this_year
-            
-            days_until = (birthday_next - today).days
-            
-            if days_until <= 60:  # Next 2 months
-                zodiac_emoji, zodiac_name = get_zodiac_sign(month, day)
-                upcoming.append({
-                    'user_id': user_id,
-                    'name': data.get('name', 'someone'),
-                    'date': birthday_next,
-                    'days_until': days_until,
-                    'zodiac_emoji': zodiac_emoji,
-                    'zodiac_name': zodiac_name
-                })
-        except:
-            continue
-    
-    if not upcoming:
-        say("No birthdays in the next 2 months!")
-        return
-    
-    # Sort by days until birthday
-    upcoming.sort(key=lambda x: x['days_until'])
-    
-    message = "🎂 *Upcoming Birthdays (Next 2 Months)* 🎂\n\n"
-    
-    for person in upcoming:
-        formatted_date = person['date'].strftime("%B %d")
-        days = person['days_until']
-        
-        if days == 0:
-            when = "🎉 TODAY!"
-        elif days == 1:
-            when = "Tomorrow"
-        else:
-            when = f"in {days} days"
-        
-        message += f"• <@{person['user_id']}>: {formatted_date} ({when}) {person['zodiac_emoji']}\n"
-    
-    say(message)
-
-@app.command("/upcominganniversaries")
-def handle_upcoming_anniversaries(ack, say):
-    """Show upcoming anniversaries for the next 2 months"""
-    ack()
-    
     anniversaries = load_anniversaries()
+    wishes = load_wishes()
     
-    if not anniversaries:
-        say("No anniversaries saved yet!")
+    # Determine if it's for birthday or anniversary
+    has_birthday = user_id in birthdays
+    has_anniversary = user_id in anniversaries
+    
+    if not has_birthday and not has_anniversary:
+        say(f"<@{user_id}> doesn't have a birthday or anniversary saved yet!")
         return
     
-    mountain_now = get_mountain_time()
-    today = mountain_now.date()
+    # Store wish
+    wish_entry = {
+        "from_user": command['user_id'],
+        "message": message,
+        "timestamp": datetime.now().isoformat()
+    }
     
-    # Get anniversaries for next 60 days
-    upcoming = []
-    for user_id, anniv_data in anniversaries.items():
-        stored_date = anniv_data.get("date", "")
-        if not stored_date:
-            continue
-        
-        try:
-            # Extract MM-DD from either MM-DD or MM-DD-YYYY format
-            date_parts = stored_date.split('-')
-            if len(date_parts) >= 2:
-                month = int(date_parts[0])
-                day = int(date_parts[1])
-            else:
-                continue
-            
-            # Calculate next occurrence
-            current_year = today.year
-            anniv_this_year = date(current_year, month, day)
-            
-            if anniv_this_year < today:
-                anniv_next = date(current_year + 1, month, day)
-            else:
-                anniv_next = anniv_this_year
-            
-            days_until = (anniv_next - today).days
-            
-            if days_until <= 60:  # Next 2 months
-                years = calculate_years(stored_date)
-                upcoming.append({
-                    'user_id': user_id,
-                    'name': anniv_data.get('name', 'someone'),
-                    'date': anniv_next,
-                    'days_until': days_until,
-                    'years': years
-                })
-        except:
-            continue
+    if has_birthday:
+        key = f"{user_id}_birthday"
+        if key not in wishes:
+            wishes[key] = []
+        wishes[key].append(wish_entry)
     
-    if not upcoming:
-        say("No work anniversaries in the next 2 months!")
-        return
+    if has_anniversary:
+        key = f"{user_id}_anniversary"
+        if key not in wishes:
+            wishes[key] = []
+        wishes[key].append(wish_entry)
     
-    # Sort by days until anniversary
-    upcoming.sort(key=lambda x: x['days_until'])
+    save_wishes(wishes)
     
-    message = "🎊 *Upcoming Work Anniversaries (Next 2 Months)* 🎊\n\n"
-    
-    for person in upcoming:
-        formatted_date = person['date'].strftime("%B %d")
-        days = person['days_until']
-        years_text = format_years(person['years'])
-        
-        if days == 0:
-            when = "🎉 TODAY!"
-        elif days == 1:
-            when = "Tomorrow"
-        else:
-            when = f"in {days} days"
-        
-        message += f"• <@{person['user_id']}>: {formatted_date} - {years_text} ({when})\n"
-    
-    say(message)
+    say(f"💌 Your message for <@{user_id}> has been saved! 🎉")
 
 @app.command("/addbirthday")
 def handle_add_birthday(ack, command, say):
@@ -923,9 +894,8 @@ def handle_mentions(body, say):
         f"• `/importcelebrations` - Import birthdays & anniversaries\n"
         f"• `/listbirthdays` - See all birthdays\n"
         f"• `/listanniversaries` - See all anniversaries\n"
-        f"• `/upcomingbirthdays` - See birthdays in next 2 months\n"
-        f"• `/upcominganniversaries` - See anniversaries in next 2 months\n"
         f"• `/todayscelebrations` - Check today's celebrations\n"
+        f"• `/addwish @user message` - Add wishes\n"
         f"• `/setbirthdaychannel` - Set announcement channel")
 
 @app.message("birthday")
@@ -943,5 +913,5 @@ if __name__ == "__main__":
     print(f"⏰ Current Mountain Time: {current_time}")
     
     handler = SocketModeHandler(app, os.environ.get("SLACK_APP_TOKEN"))
-    print("⚡️ Celebration Bot v5 is running!")
+    print("⚡️ Celebration Bot v4 is running!")
     handler.start()
