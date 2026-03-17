@@ -830,197 +830,45 @@ def handle_upcoming_anniversaries(ack, say):
     say(message)
 
 @app.command("/addbirthday")
-def handle_add_birthday(ack, command, say, client):
-    """Add a birthday using Slack user ID"""
+def handle_add_birthday(ack, command, say):
+    """Add a birthday"""
     ack()
     
     text = command['text'].strip()
     
     if not text:
-        say("Please provide a Slack user ID and birthday date!\n\n"
-            "**Format:** `/addbirthday U123456789 MM-DD`\n"
-            "**Example:** `/addbirthday U098G5UV54P 07-22`\n\n"
-            "💡 **How to find Slack ID:** Right-click someone's name → Copy member ID")
+        say("Please provide a birthday date! Format: `/addbirthday MM-DD` or `/addbirthday @user MM-DD`")
         return
     
     parts = text.split()
+    birthdays = load_birthdays()
     
-    if len(parts) < 2:
-        say("Please provide both Slack ID and date!\n\n"
-            "**Format:** `/addbirthday U123456789 MM-DD`\n"
-            "**Example:** `/addbirthday U098G5UV54P 07-22`")
-        return
+    if parts[0].startswith('<@'):
+        if len(parts) < 2:
+            say("Please provide a date!")
+            return
+        user_id = parts[0].strip('<@>|')
+        birthday_date = parts[1]
+    else:
+        user_id = command['user_id']
+        birthday_date = parts[0]
     
-    user_id = parts[0]
-    birthday_date = parts[1]
-    
-    # Validate Slack ID format
-    if not user_id.startswith('U'):
-        say("❌ Invalid Slack ID! It should start with 'U'\n\n"
-            "**Format:** `/addbirthday U123456789 MM-DD`\n\n"
-            "💡 **How to find Slack ID:** Right-click someone's name → Copy member ID")
-        return
-    
-    # Validate date format
     try:
         test_date = datetime.strptime(f"2024-{birthday_date}", "%Y-%m-%d")
         month = test_date.month
         day = test_date.day
         zodiac_emoji, zodiac_name = get_zodiac_sign(month, day)
     except ValueError:
-        say("❌ Invalid date format! Please use MM-DD\n\n"
-            "**Format:** `/addbirthday U123456789 MM-DD`\n"
-            "**Example:** `/addbirthday U098G5UV54P 07-22`")
+        say("Invalid date format! Please use MM-DD")
         return
     
-    # Get user's real name
-    try:
-        user_info = client.users_info(user=user_id)
-        user_name = user_info['user']['real_name']
-    except:
-        user_name = "Unknown User"
-    
-    birthdays = load_birthdays()
     birthdays[user_id] = {
-        "name": user_name,
+        "name": command['user_name'],
         "date": birthday_date
     }
     save_birthdays(birthdays)
     
-    say(f"✅ Birthday saved for <@{user_id}> ({user_name})!\n"
-        f"📅 Date: {birthday_date}\n"
-        f"{zodiac_emoji} Zodiac: *{zodiac_name}*")
-
-@app.command("/addanniversary")
-def handle_add_anniversary(ack, command, say, client):
-    """Add a work anniversary using Slack user ID"""
-    ack()
-    
-    text = command['text'].strip()
-    
-    if not text:
-        say("Please provide a Slack user ID and anniversary date!\n\n"
-            "**Format:** `/addanniversary U123456789 MM-DD-YYYY`\n"
-            "**Example:** `/addanniversary U098G5UV54P 03-12-2026`\n\n"
-            "💡 **How to find Slack ID:** Right-click someone's name → Copy member ID")
-        return
-    
-    parts = text.split()
-    
-    if len(parts) < 2:
-        say("Please provide both Slack ID and date!\n\n"
-            "**Format:** `/addanniversary U123456789 MM-DD-YYYY`\n"
-            "**Example:** `/addanniversary U098G5UV54P 03-12-2026`")
-        return
-    
-    user_id = parts[0]
-    anniversary_date = parts[1]
-    
-    # Validate Slack ID format
-    if not user_id.startswith('U'):
-        say("❌ Invalid Slack ID! It should start with 'U'\n\n"
-            "**Format:** `/addanniversary U123456789 MM-DD-YYYY`\n\n"
-            "💡 **How to find Slack ID:** Right-click someone's name → Copy member ID")
-        return
-    
-    # Validate date format (MM-DD-YYYY)
-    try:
-        datetime.strptime(anniversary_date, "%m-%d-%Y")
-    except ValueError:
-        say("❌ Invalid date format! Please use MM-DD-YYYY (include the year)\n\n"
-            "**Format:** `/addanniversary U123456789 MM-DD-YYYY`\n"
-            "**Example:** `/addanniversary U098G5UV54P 03-12-2026`")
-        return
-    
-    # Get user's real name
-    try:
-        user_info = client.users_info(user=user_id)
-        user_name = user_info['user']['real_name']
-    except:
-        user_name = "Unknown User"
-    
-    # Calculate years
-    years = calculate_years(anniversary_date)
-    years_text = format_years(years)
-    
-    anniversaries = load_anniversaries()
-    anniversaries[user_id] = {
-        "name": user_name,
-        "date": anniversary_date
-    }
-    save_anniversaries(anniversaries)
-    
-    say(f"✅ Work anniversary saved for <@{user_id}> ({user_name})!\n"
-        f"📅 Start date: {anniversary_date}\n"
-        f"🎊 Current tenure: {years_text}")
-
-@app.command("/removebirthday")
-def handle_remove_birthday(ack, command, say):
-    """Remove a birthday using Slack user ID"""
-    ack()
-    
-    text = command['text'].strip()
-    
-    if not text:
-        say("Please provide a Slack user ID!\n\n"
-            "**Format:** `/removebirthday U123456789`\n"
-            "**Example:** `/removebirthday U098G5UV54P`\n\n"
-            "💡 **How to find Slack ID:** Right-click someone's name → Copy member ID")
-        return
-    
-    user_id = text.strip()
-    
-    # Validate Slack ID format
-    if not user_id.startswith('U'):
-        say("❌ Invalid Slack ID! It should start with 'U'\n\n"
-            "**Format:** `/removebirthday U123456789`")
-        return
-    
-    birthdays = load_birthdays()
-    
-    if user_id not in birthdays:
-        say(f"❌ No birthday found for <@{user_id}>")
-        return
-    
-    user_name = birthdays[user_id].get('name', 'Unknown')
-    del birthdays[user_id]
-    save_birthdays(birthdays)
-    
-    say(f"✅ Birthday removed for <@{user_id}> ({user_name})")
-
-@app.command("/removeanniversary")
-def handle_remove_anniversary(ack, command, say):
-    """Remove a work anniversary using Slack user ID"""
-    ack()
-    
-    text = command['text'].strip()
-    
-    if not text:
-        say("Please provide a Slack user ID!\n\n"
-            "**Format:** `/removeanniversary U123456789`\n"
-            "**Example:** `/removeanniversary U098G5UV54P`\n\n"
-            "💡 **How to find Slack ID:** Right-click someone's name → Copy member ID")
-        return
-    
-    user_id = text.strip()
-    
-    # Validate Slack ID format
-    if not user_id.startswith('U'):
-        say("❌ Invalid Slack ID! It should start with 'U'\n\n"
-            "**Format:** `/removeanniversary U123456789`")
-        return
-    
-    anniversaries = load_anniversaries()
-    
-    if user_id not in anniversaries:
-        say(f"❌ No anniversary found for <@{user_id}>")
-        return
-    
-    user_name = anniversaries[user_id].get('name', 'Unknown')
-    del anniversaries[user_id]
-    save_anniversaries(anniversaries)
-    
-    say(f"✅ Work anniversary removed for <@{user_id}> ({user_name})")
+    say(f"🎂 Birthday saved for <@{user_id}> on {birthday_date}! {zodiac_emoji} *{zodiac_name}*")
 
 @app.command("/listbirthdays")
 def handle_list_birthdays(ack, say):
@@ -1053,18 +901,13 @@ def handle_list_birthdays(ack, say):
 def handle_mentions(body, say):
     """Respond to mentions"""
     say(f"Hi <@{body['event']['user']}>! 👋 I'm the Celebration Bot!\n\n"
-        f"*View Celebrations:*\n"
+        f"*Commands:*\n"
+        f"• `/importcelebrations` - Import birthdays & anniversaries\n"
         f"• `/listbirthdays` - See all birthdays\n"
         f"• `/listanniversaries` - See all anniversaries\n"
-        f"• `/upcomingbirthdays` - Next 2 months of birthdays\n"
-        f"• `/upcominganniversaries` - Next 2 months of anniversaries\n"
-        f"• `/todayscelebrations` - Check today's celebrations\n\n"
-        f"*Admin Commands:*\n"
-        f"• `/addbirthday U123456 MM-DD` - Add a birthday\n"
-        f"• `/addanniversary U123456 MM-DD-YYYY` - Add anniversary\n"
-        f"• `/removebirthday U123456` - Remove birthday\n"
-        f"• `/removeanniversary U123456` - Remove anniversary\n"
-        f"• `/importcelebrations` - Bulk import from CSV\n"
+        f"• `/upcomingbirthdays` - See birthdays in next 2 months\n"
+        f"• `/upcominganniversaries` - See anniversaries in next 2 months\n"
+        f"• `/todayscelebrations` - Check today's celebrations\n"
         f"• `/setbirthdaychannel` - Set announcement channel")
 
 @app.message("birthday")
@@ -1082,5 +925,5 @@ if __name__ == "__main__":
     print(f"⏰ Current Mountain Time: {current_time}")
     
     handler = SocketModeHandler(app, os.environ.get("SLACK_APP_TOKEN"))
-    print("⚡️ Celebration Bot v5.1 is running!")
+    print("⚡️ Celebration Bot v5 is running!")
     handler.start()
