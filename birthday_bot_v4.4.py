@@ -897,6 +897,24 @@ def handle_list_birthdays(ack, say):
     
     say(message)
 
+@app.command("/birthdaystats")
+def handle_birthday_stats(ack, say):
+    """Show birthday statistics"""
+    ack()
+    
+    birthdays = load_birthdays()
+    anniversaries = load_anniversaries()
+    
+    if not birthdays and not anniversaries:
+        say("No data yet!")
+        return
+    
+    message = f"📊 *Celebration Statistics* 📊\n\n"
+    message += f"🎂 Total Birthdays: {len(birthdays)}\n"
+    message += f"🎊 Total Anniversaries: {len(anniversaries)}\n"
+    
+    say(message)
+
 @app.event("app_mention")
 def handle_mentions(body, say):
     """Respond to mentions"""
