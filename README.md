@@ -30,6 +30,11 @@ v5
 - 🌸 **Upcoming Birthdays** - See all birthdays coming up in the next 2 months
 - 🫧 **Upcoming Anniversaries** - See all work anniversaries coming up in the next 2 months
 
+v5.1
+- 🌿 **Adding Anniversaries** - Add work anniversaries easily during onboarding
+- 🗺️ **Removing Birthdays and Anniversaries** - Remove birthdays + anniversaries during offboarding
+- 🎐 **Simplified adding birthdays** - Now uses Slack ID directly (no more @ mentions!)
+
 ## core commands 🍰*ੈ✩‧₊˚ (8 total):
 
 DAILY USE:
