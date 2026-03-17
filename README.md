@@ -22,8 +22,13 @@ v3
 v4
 - 🎊 **Work Anniversary Tracking** - Track employee work anniversaries with automatic year calculation
 - 📁 **Combined Import** - Import birthdays AND anniversaries in one CSV
-- 🫧 **Anniversary Commands** - /todayscelebrations, /addwish, etc.
+- 🥪 **Anniversary Commands** - /todayscelebrations, /addwish, etc.
 - 💌 **Smart Wish System** - Wishes automatically apply to the right celebration type
+
+v5
+- 🔖 **Removed /addwish command** - Simplified the bot so less complexity for users
+- 🌸 **Upcoming Birthdays** - See all birthdays coming up in the next 2 months
+- 🫧 **Upcoming Anniversaries** - See all work anniversaries coming up in the next 2 months
 
 ## prerequisites 🍰*ੈ✩‧₊˚
 
