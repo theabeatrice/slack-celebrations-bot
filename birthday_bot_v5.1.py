@@ -100,11 +100,10 @@ GIPHY_BIRTHDAY_TERMS = [
 ]
 
 GIPHY_ANNIVERSARY_TERMS = [
-    "congratulations work",
-    "congratulations team",
-    "celebration confetti",
-    "thank you appreciation",
-    "teamwork celebration"
+    "work anniversary celebration",
+    "congratulations confetti",
+    "celebration party",
+    "anniversary celebration"
 ]
 
 def get_mountain_time():
@@ -455,27 +454,18 @@ def post_celebrations():
             print(f"Error posting anniversary: {e}")
 
 def schedule_checker():
-    """Background thread for scheduled tasks - checks every minute for Mountain Time"""
-    print(f"📅 Scheduler started - checks at 9 AM Mountain Time")
-    mountain_now = get_mountain_time()
-    print(f"⏰ Current Mountain Time: {mountain_now.strftime('%I:%M %p %Z')}")
+    """Background thread for scheduled tasks"""
+    config = load_config()
+    announcement_time = config.get("announcement_time", "09:00")
+    
+    schedule.every().day.at(announcement_time).do(post_celebrations)
+    schedule.every().day.at(announcement_time).do(post_reminders)
+    
+    print(f"Scheduler configured for {announcement_time} Mountain Time")
     
     while True:
-        # Get current Mountain Time
-        mountain_now = get_mountain_time()
-        current_hour = mountain_now.hour
-        current_minute = mountain_now.minute
-        
-        # Check if it's 9:00 AM MT
-        if current_hour == 9 and current_minute == 0:
-            print(f"🎉 It's 9:00 AM MT! Running celebrations...")
-            post_celebrations()
-            post_reminders()
-            # Sleep for 60 seconds to avoid running multiple times in the same minute
-            time.sleep(60)
-        
-        # Sleep for 30 seconds before next check
-        time.sleep(30)
+        schedule.run_pending()
+        time.sleep(60)
 
 # COMMAND: Import from CSV with anniversaries
 @app.command("/importcelebrations")
@@ -1092,5 +1082,5 @@ if __name__ == "__main__":
     print(f"⏰ Current Mountain Time: {current_time}")
     
     handler = SocketModeHandler(app, os.environ.get("SLACK_APP_TOKEN"))
-    print("⚡️ Celebration Bot v5.2 is running!")
+    print("⚡️ Celebration Bot v5.1 is running!")
     handler.start()
