@@ -35,6 +35,9 @@ v5.1
 - 🗺️ **Removing Birthdays and Anniversaries** - Remove birthdays + anniversaries during offboarding
 - 🎐 **Simplified adding birthdays** - Now uses Slack ID directly (no more @ mentions!)
 
+v5.2
+- 🪲 **Bug Fixes** - Fixed wrong posting time and wrong celebration gifs
+
 ## core commands 🍰*ੈ✩‧₊˚ (8 total):
 
 DAILY USE:
