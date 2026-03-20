@@ -470,7 +470,7 @@ def schedule_checker():
         if current_hour == 9 and current_minute == 0:
             print(f"🎉 It's 9:00 AM MT! Running celebrations...")
             post_celebrations()
-            post_reminders()
+            # removed: post_reminders()
             # Sleep for 60 seconds to avoid running multiple times in the same minute
             time.sleep(60)
         
