@@ -92,19 +92,19 @@ ANNIVERSARY_MESSAGES = [
 ]
 
 GIPHY_BIRTHDAY_TERMS = [
-    "happy birthday celebration",
-    "birthday cake",
-    "birthday party",
-    "birthday balloons",
-    "happy birthday confetti"
+    "balloons celebration",
+    "colorful balloons",
+    "party balloons",
+    "balloon animation",
+    "floating balloons"
 ]
 
 GIPHY_ANNIVERSARY_TERMS = [
-    "congratulations work",
-    "congratulations team",
-    "celebration confetti",
-    "thank you appreciation",
-    "teamwork celebration"
+    "balloons celebration",
+    "colorful balloons",
+    "party balloons",
+    "balloon animation",
+    "floating balloons"
 ]
 
 def get_mountain_time():
