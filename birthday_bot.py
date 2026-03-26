@@ -395,15 +395,6 @@ def post_celebrations():
             }
         ]
         
-        if config.get("giphy_enabled", True):
-            gif_url = get_random_gif(is_anniversary=False)
-            if gif_url:
-                blocks.append({
-                    "type": "image",
-                    "image_url": gif_url,
-                    "alt_text": "Birthday celebration"
-                })
-        
         try:
             app.client.chat_postMessage(
                 channel=channel,
@@ -433,15 +424,6 @@ def post_celebrations():
                 }
             }
         ]
-        
-        if config.get("giphy_enabled", True):
-            gif_url = get_random_gif(is_anniversary=True)
-            if gif_url:
-                blocks.append({
-                    "type": "image",
-                    "image_url": gif_url,
-                    "alt_text": "Anniversary celebration"
-                })
         
         try:
             app.client.chat_postMessage(
@@ -1076,11 +1058,6 @@ def handle_mentions(body, say):
         f"• `/removeanniversary U123456` - Remove anniversary\n"
         f"• `/importcelebrations` - Bulk import from CSV\n"
         f"• `/setbirthdaychannel` - Set announcement channel")
-
-@app.message("birthday")
-def respond_to_birthday_message(say):
-    """Respond to birthday mentions"""
-    say("Did someone say birthday? 🎂 Use `/todayscelebrations` to see today's celebrations!")
 
 if __name__ == "__main__":
     scheduler_thread = threading.Thread(target=schedule_checker, daemon=True)
